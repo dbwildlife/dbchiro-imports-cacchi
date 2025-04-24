@@ -24,6 +24,7 @@ CREATE TABLE imports.source_data
     session_id                   INT,
     session_uuid                 UUID,
     session_study_name           VARCHAR,
+    session_study_organism       VARCHAR,
     session_name                 VARCHAR,
     session_contact_code         VARCHAR,
     session_date_start           DATE,
@@ -116,8 +117,8 @@ WITH places AS
                              , NULL                                                           AS comment
                              , NULL                                                           AS other_imported_data
                              , FALSE                                                          AS telemetric_crossaz
-                             , NULL                                                           AS bdsource
-                             , NULL                                                           AS id_bdsource
+                             , source_data.place_bdsource                                     AS bdsource
+                             , source_data.place_id_bdsource                                  AS id_bdsource
                              , st_x(source_data.geom)                                         AS x
                              , st_y(source_data.geom)                                         AS y
                              , source_data.geom
@@ -137,9 +138,9 @@ WITH places AS
                --   , json_build_object('info',
 --                       'Donnée manuellement importée par fcloitre le ' || now())                                    AS extra_data
                FROM imports.source_data
-                        JOIN
-               uuids ON
-                   uuids.place_name = source_data.place_name
+                        LEFT JOIN uuids ON
+                   (uuids.place_name, coalesce(uuids.place_uuid::VARCHAR, ''), uuids.geom) =
+                   (source_data.place_name, coalesce(source_data.place_uuid::VARCHAR, ''), source_data.geom)
                         LEFT JOIN dbchiro.accounts_profile ON sighting_main_observer = accounts_profile.username
                         LEFT JOIN dbchiro.geodata_landcover
                                   ON st_intersects(geodata_landcover.geom, source_data.geom)
@@ -157,8 +158,10 @@ SELECT sights_place.id_place                                                AS i
                                            'type',
                                            'manual_import', 'date', now())) AS extra_data
 FROM datas
-         LEFT JOIN dbchiro.sights_place ON datas.uuid = sights_place.uuid
+         LEFT JOIN dbchiro.sights_place
+                   ON datas.uuid = sights_place.uuid
 ;
+select * from imports.v_import_place;
 
 -- Study import view
 

@@ -1,4 +1,4 @@
-INSERT INTO dbchiro4testimport.imports.source_data ( metaplace_id, metaplace_name, place_id, place_uuid, place_name
+INSERT INTO imports.source_data ( metaplace_id, metaplace_name, place_id, place_uuid, place_name
                                                    , place_is_gite, place_alti, place_bdsource, place_id_bdsource
                                                    , place_x, place_y, geom, place_type_code, session_id, session_uuid
                                                    , session_study_name, session_name, session_contact_code
